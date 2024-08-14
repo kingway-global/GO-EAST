@@ -23,7 +23,7 @@ instance = m1.create_instance('EIC_data.dat')
 instance.dual = pyo.Suffix(direction=pyo.Suffix.IMPORT)
 
 Solvername = 'gurobi'
-Timelimit = 3600 # for the simulation of one day in seconds
+Timelimit = 14400 # for the simulation of one day in seconds
 #Timelimit = 7200 # for the simulation of one day in seconds
 Threadlimit = 8 # maximum number of threads to use
 
@@ -32,7 +32,7 @@ if Solvername == 'cplex':
     opt.options['timelimit'] = Timelimit
 elif Solvername == 'gurobi':           
     opt.options['TimeLimit'] = Timelimit
-    opt.options['MIPFocus'] = 1  # Focus on finding a feasible solution
+    #opt.options['MIPFocus'] = 1  # Focus on finding a feasible solution
     
 opt.options['threads'] = Threadlimit
 
