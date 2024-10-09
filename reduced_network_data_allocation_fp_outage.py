@@ -37,13 +37,13 @@ df_hydro = pd.read_csv(os.path.join(base_dir, 'Gen/BA_hydro_corrected.csv'), hea
 # all_BA_BA_connections = list(BA_to_BA_transmission_data['BA_to_BA'])
 
 #NODE_NUMBER = [500,525,550,575,600,625,650,675,700]
-NODE_NUMBER = [650]     # 2 pieces
+NODE_NUMBER = [500]     # 4 pieces
 
 # UC_TREATMENTS = ['_simple','_coal']
 UC_TREATMENTS = ['_simple']
 
 #trans_p = [25, 50 ,75 ,100, 200, 300, 400, 500]
-trans_p = [25]
+trans_p = [300]
 
 sections = [1, 2, 3, 4]
 

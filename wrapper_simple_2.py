@@ -290,27 +290,23 @@ for day in range(101,days+1):
 
     print(day)
         
-#vlt_angle_pd=pd.DataFrame(vlt_angle,columns=('Node','Time','Value'))
+vlt_angle_pd=pd.DataFrame(vlt_angle,columns=('Node','Time','Value'))
 mwh_pd=pd.DataFrame(mwh,columns=('Generator','Type','Time','Value'))
 # on_pd=pd.DataFrame(on,columns=('Generator','Time','Value'))
 # switch_pd=pd.DataFrame(switch,columns=('Generator','Time','Value'))
 # srsv_pd=pd.DataFrame(srsv,columns=('Generator','Time','Value'))
 # nrsv_pd=pd.DataFrame(nrsv,columns=('Generator','Time','Value'))
-#slack_pd = pd.DataFrame(slack,columns=('Node','Time','Value'))
-#flow_pd = pd.DataFrame(flow,columns=('Line','Time','Value'))
+slack_pd = pd.DataFrame(slack,columns=('Node','Time','Value'))
+flow_pd = pd.DataFrame(flow,columns=('Line','Time','Value'))
 duals_pd = pd.DataFrame(duals,columns=['Bus','Time','Value'])
 
 #to save outputs
 mwh_pd.to_csv('mwh.csv', index=False)
-#vlt_angle_pd.to_csv('vlt_angle.csv', index=False)
+vlt_angle_pd.to_csv('vlt_angle.csv', index=False)
 # on_pd.to_csv('on.csv', index=False)
 # switch_pd.to_csv('switch.csv', index=False)
 # srsv_pd.to_csv('srsv.csv', index=False)
 # nrsv_pd.to_csv('nrsv.csv', index=False)
-#slack_pd.to_csv('slack.csv', index=False)
-#flow_pd.to_csv('flow.csv', index=False)
+slack_pd.to_csv('slack.csv', index=False)
+flow_pd.to_csv('flow.csv', index=False)
 duals_pd.to_csv('duals.csv', index=False)
-
-
-
-
