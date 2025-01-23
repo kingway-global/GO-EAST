@@ -42,7 +42,7 @@ NODE_NUMBER = [500]
 UC_TREATMENTS = ['_simple']
 
 #rans_p = [25, 50 ,75 ,100, 200, 300, 400, 500]
-trans_p = [100]
+trans_p = [300]
 
 sections = [1, 2, 3, 4]
 
