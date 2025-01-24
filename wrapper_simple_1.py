@@ -23,9 +23,9 @@ instance = m1.create_instance('EIC_data.dat')
 instance.dual = pyo.Suffix(direction=pyo.Suffix.IMPORT)
 
 Solvername = 'gurobi'
+#Timelimit = 3600 # for the simulation of one day in seconds
 Timelimit = 14400 # for the simulation of one day in seconds
-#Timelimit = 7200 # for the simulation of one day in seconds
-Threadlimit = 8 # maximum number of threads to use
+Threadlimit = 2 # maximum number of threads to use
 
 opt = SolverFactory(Solvername)
 if Solvername == 'cplex':
@@ -51,6 +51,7 @@ flow=[]
 slack = []
 vlt_angle=[]
 duals=[]
+objective_values = []
 
 df_generators = pd.read_csv('data_genparams.csv',header=0)
 
@@ -183,17 +184,40 @@ for day in range(1,days+1):
     for z in instance.Nuclear_800_1000:
         for i in K:
             instance.HorizonMustrunLimit[z,i] = max(0,instance.HorizonMustrunLimit[z,i].value - df_losses.loc[(day-1)*24+i,'Nuclear_800_1000']/len(df_loss_dict['Nuclear_800_1000']))        
+
+# =============================================================================
+#     
+#     result = opt.solve(instance,tee=True,symbolic_solver_labels=True, load_solutions=False) ##,tee=True to check number of variables\n",
+#     #instance.solutions.load_from(result)  
+#     
+#     # Check the solver status before loading the solution
+#     if result.solver.status == pyo.SolverStatus.ok and (result.solver.termination_condition == pyo.TerminationCondition.optimal or result.solver.termination_condition == pyo.TerminationCondition.feasible):
+#         instance.solutions.load_from(result)
+#     else:
+#         print("The solver did not find a feasible solution.")
+#         # Handle this situation (e.g., try a different approach, log the error, etc.)
+#         
+# =============================================================================
+
+    # Solver execution and checking for feasible solutions
+    result = opt.solve(instance, tee=True, symbolic_solver_labels=True, load_solutions=False)
     
-    result = opt.solve(instance,tee=True,symbolic_solver_labels=True, load_solutions=False) ##,tee=True to check number of variables\n", # tee=True prints solver log to console
-    #instance.solutions.load_from(result)  
-    
-    # Check the solver status before loading the solution
-    if result.solver.status == pyo.SolverStatus.ok and (result.solver.termination_condition == pyo.TerminationCondition.optimal or result.solver.termination_condition == pyo.TerminationCondition.feasible):
+    if result.solver.status == pyo.SolverStatus.ok and (
+        result.solver.termination_condition == pyo.TerminationCondition.optimal or
+        result.solver.termination_condition == pyo.TerminationCondition.feasible):
+        
+        # Load the solution into the instance
         instance.solutions.load_from(result)
+    
+        # Get and store the objective value in the parameter
+        instance.ObjValue = pyo.value(instance.SystemCost)
+        print(f"Objective Value for Day {day}: {instance.ObjValue}")
+    
+        # Store the day and objective value in a list for tracking
+        objective_values.append((day, instance.ObjValue))
     else:
         print("The solver did not find a feasible solution.")
-        # Handle this situation (e.g., try a different approach, log the error, etc.)
-        
+
     print('LP')
 
     for c in instance.component_objects(Constraint, active=True):
@@ -290,10 +314,10 @@ for day in range(1,days+1):
         
 vlt_angle_pd=pd.DataFrame(vlt_angle,columns=('Node','Time','Value'))
 mwh_pd=pd.DataFrame(mwh,columns=('Generator','Type','Time','Value'))
-# on_pd=pd.DataFrame(on,columns=('Generator','Time','Value'))
-# switch_pd=pd.DataFrame(switch,columns=('Generator','Time','Value'))
-# srsv_pd=pd.DataFrame(srsv,columns=('Generator','Time','Value'))
-# nrsv_pd=pd.DataFrame(nrsv,columns=('Generator','Time','Value'))
+#on_pd=pd.DataFrame(on,columns=('Generator','Time','Value'))
+#switch_pd=pd.DataFrame(switch,columns=('Generator','Time','Value'))
+#srsv_pd=pd.DataFrame(srsv,columns=('Generator','Time','Value'))
+#nrsv_pd=pd.DataFrame(nrsv,columns=('Generator','Time','Value'))
 slack_pd = pd.DataFrame(slack,columns=('Node','Time','Value'))
 flow_pd = pd.DataFrame(flow,columns=('Line','Time','Value'))
 duals_pd = pd.DataFrame(duals,columns=['Bus','Time','Value'])
@@ -301,10 +325,14 @@ duals_pd = pd.DataFrame(duals,columns=['Bus','Time','Value'])
 #to save outputs
 mwh_pd.to_csv('mwh.csv', index=False)
 vlt_angle_pd.to_csv('vlt_angle.csv', index=False)
-# on_pd.to_csv('on.csv', index=False)
-# switch_pd.to_csv('switch.csv', index=False)
-# srsv_pd.to_csv('srsv.csv', index=False)
-# nrsv_pd.to_csv('nrsv.csv', index=False)
+#on_pd.to_csv('on.csv', index=False)
+#switch_pd.to_csv('switch.csv', index=False)
+#srsv_pd.to_csv('srsv.csv', index=False)
+#nrsv_pd.to_csv('nrsv.csv', index=False)
 slack_pd.to_csv('slack.csv', index=False)
 flow_pd.to_csv('flow.csv', index=False)
 duals_pd.to_csv('duals.csv', index=False)
+
+# Convert the objective values to a DataFrame and save them
+df_objective = pd.DataFrame(objective_values, columns=['Day', 'ObjectiveValue'])
+df_objective.to_csv('objective_values.csv', index=False)
