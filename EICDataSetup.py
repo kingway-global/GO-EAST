@@ -80,18 +80,18 @@ for i in sites:
 df_wind = df_wind.drop(columns=empty)
 
 ##
-##hourly ts of dispatchable hydro-power at each plant
-df_hydro = pd.read_csv('nodal_hydro.csv',header=0)
+##daily hydro energy budget at each plant
+df_hydro_daily = pd.read_csv('nodal_hydro_daily.csv', header=0)
 
 empty = []
-sites = list(df_hydro.columns)
+sites = list(df_hydro_daily.columns)
 for i in sites:
-    if sum(df_hydro[i]) > 0:
+    if sum(df_hydro_daily[i]) > 0:
         pass
     else:
         empty.append(i)
 
-df_hydro = df_hydro.drop(columns=empty)
+df_hydro_daily = df_hydro_daily.drop(columns=empty)
 
 ##hourly ts of load at substation-level
 df_load = pd.read_csv('nodal_load.csv',header=0) 
@@ -371,14 +371,14 @@ with open(''+str(data_name)+'.dat', 'w') as f:
     
     print('wind')
     
-    f.write('param:' + '\t' + 'SimHydro:=' + '\n')
-    w_gens = df_hydro.columns
-    for z in w_gens:
-        for h in range(0,len(df_hydro)):
-            f.write(z + '_HYDRO' + '\t' + str(h+1) + '\t' + str(df_hydro.loc[h,z]) + '\n')
+    f.write('param:' + '\t' + 'SimHydroDaily:=' + '\n')
+    h_gens = df_hydro_daily.columns
+    for z in h_gens:
+        for d in range(0, len(df_hydro_daily)):
+            f.write(z + '_HYDRO' + '\t' + str(d+1) + '\t' + str(df_hydro_daily.loc[d, z]) + '\n')
     f.write(';\n\n')
     
-    print('hydro')
+    print('hydro daily')
     
 
     

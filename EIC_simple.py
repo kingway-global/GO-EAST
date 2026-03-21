@@ -141,7 +141,8 @@ model.HorizonDemand = Param(model.buses*model.hh_periods,within=NonNegativeReals
 # model.HorizonReserves = Param(model.hh_periods, within=NonNegativeReals,mutable=True)
 
 ##Variable resources over simulation period
-model.SimHydro = Param(model.Hydro, model.SH_periods, within=NonNegativeReals)
+#model.SimHydro = Param(model.Hydro, model.SH_periods, within=NonNegativeReals)
+model.SimHydroDaily = Param(model.Hydro, model.SD_periods, within=NonNegativeReals)
 model.SimSolar = Param(model.Solar, model.SH_periods, within=NonNegativeReals)
 model.SimWind = Param(model.Wind, model.SH_periods, within=NonNegativeReals)
 #Lost capacity due to outage
@@ -149,7 +150,8 @@ model.SimGenLimit = Param(model.Outage,model.SH_periods, within=NonNegativeReals
 model.SimMustrunLimit = Param(model.buses,model.SH_periods, within=NonNegativeReals)
 
 #Variable resources over horizon
-model.HorizonHydro = Param(model.Hydro,within=NonNegativeReals,mutable=True)
+#model.HorizonHydro = Param(model.Hydro,within=NonNegativeReals,mutable=True)
+model.HorizonHydroBudget = Param(model.Hydro, within=NonNegativeReals, mutable=True)
 model.HorizonSolar = Param(model.Solar,model.hh_periods,within=NonNegativeReals,mutable=True)
 model.HorizonWind = Param(model.Wind,model.hh_periods,within=NonNegativeReals,mutable=True)
 #Lost capacity due to outage
@@ -242,10 +244,14 @@ model.MaxCap2= Constraint(model.Dispatchable,model.hh_periods,rule=MaxC2)
 
 
 #Max capacity constraints on domestic hydropower 
-def HydroC(model,j,i):
-    return  model.mwh[j,i] <= model.HorizonHydro[j]    
-model.HydroConstraint= Constraint(model.Hydro,model.hh_periods,rule=HydroC)
+#def HydroC(model,j,i):
+#    return  model.mwh[j,i] <= model.HorizonHydro[j]    
+#model.HydroConstraint= Constraint(model.Hydro,model.hh_periods,rule=HydroC)
 
+# Daily hydro energy budget over the 24-hour horizon
+def HydroBudget(model, j):
+    return sum(model.mwh[j, i] for i in model.hh_periods) <= model.HorizonHydroBudget[j]
+model.HydroBudgetConstraint = Constraint(model.Hydro, rule=HydroBudget)
 
 #Max capacity constraints on solar
 def SolarC(model,j,i): 

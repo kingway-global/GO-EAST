@@ -72,9 +72,13 @@ for day in range(101,days+1):
 
             # instance.HorizonReserves[i] = instance.SimReserves[(day-1)*24+i]
 
-    for z in instance.Hydro:
+    #for z in instance.Hydro:
     #load Hydropower time series data
-        instance.HorizonHydro[z] = instance.SimHydro[z,day]
+    #    instance.HorizonHydro[z] = instance.SimHydro[z,day]
+
+    for z in instance.Hydro:
+        # load daily hydro energy budget for this day
+        instance.HorizonHydroBudget[z] = instance.SimHydroDaily[z, day]
 
         
     for z in instance.Solar:

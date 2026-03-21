@@ -514,10 +514,16 @@ for section in sections:
                 for i in range(0,len(buses)):
                     h_buses.append('bus_' + str(buses[i]))
                 
-                df_C = pd.DataFrame(T)
-                df_C.columns = h_buses
-                df_C.to_csv('nodal_hydro.csv',index=None)  
-                copy('nodal_hydro.csv',path)
+                # hourly nodal hydro (8760 x buses)
+                df_hydro_hourly = pd.DataFrame(T)
+                df_hydro_hourly.columns = h_buses
+                df_hydro_hourly.to_csv('nodal_hydro_hourly.csv', index=None)
+                copy('nodal_hydro_hourly.csv', path)
+                
+                # daily nodal hydro energy budget (365 x buses)
+                df_hydro_daily = df_hydro_hourly.groupby(np.arange(len(df_hydro_hourly)) // 24).sum()
+                df_hydro_daily.to_csv('nodal_hydro_daily.csv', index=None)
+                copy('nodal_hydro_daily.csv', path)
                 
                 
                 ##############################
@@ -869,12 +875,12 @@ for section in sections:
                 
                 # hydro
                 
-                df_H = pd.read_csv('nodal_hydro.csv',header=0)
+                df_H = pd.read_csv('nodal_hydro_hourly.csv', header=0)
                 buses = list(df_H.columns)
                 for n in buses:
                     if sum(df_H[n]) > 0:
                         name = n + '_HYDRO'
-                        maxcap = max(df_H[n])
+                        maxcap = max(df_H[n])   # hourly MW cap
                         names.append(name)
                         typs.append('hydro')
                         nodes.append(n)
@@ -885,7 +891,7 @@ for section in sections:
                         st_costs.append(1)
                         ramps.append(maxcap)
                         minups.append(0)
-                        mindns.append(0)   
+                        mindns.append(0)
                         heat_rates.append(0)
                 
                 df_genparams = pd.DataFrame()
