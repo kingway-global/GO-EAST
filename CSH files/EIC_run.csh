@@ -1,53 +1,86 @@
 #!/bin/tcsh
 
-# Set up conda and gurobi environment
+# =========================================================
+# EIC batch runner for the restructured East DCOPF workflow
+# Supports both transmission-expansion modes:
+#   +%  folders: Exp500_simple_300_2019
+#   +MW folders: Exp500_simple_MW_25_2019
+#
+# Expected per-folder files:
+#   EIC_data.dat
+#   EIC_simple.py
+#   wrapper_simple.py
+#
+# The wrapper is run four times per case:
+#   python wrapper_simple.py --win 0
+#   python wrapper_simple.py --win 1
+#   python wrapper_simple.py --win 2
+#   python wrapper_simple.py --win 3
+# =========================================================
 
-conda activate /usr/local/usrapps/infews/group_env
+# Set up conda and gurobi environment
+#conda activate /usr/local/usrapps/infews/group_env
 module load gurobi
 source /usr/local/apps/gurobi/gurobi810/linux64/bin/gurobi.sh
 
-# Submit multiple jobs at once
-
+# -----------------------------
+# User settings
+# -----------------------------
 set folNameBase = Exp
 
-foreach Year (`seq 1980 2019`)
+# Years to run
+# For the new GADS raw-available-capacity workflow, use the years for which
+# HorizonGenLimits_base_${NN}_y_${Year}.csv has been generated.
+foreach Year ( 2019 )
 
-	#foreach NN ( 500 525 550 575 600 625 650 675 700 )
-	foreach NN ( 500 )
-	#foreach NN ( 525 550 575 600 625 650 675 700 )
+    # Reduced-network sizes
+    foreach NN ( 500 )
 
-		foreach SC ( _1 _2 _3 _4 )
+        # UC treatments. Use names without leading/trailing underscores here.
+        foreach UC ( simple )
 
-			foreach UC ( _simple_ )
+            # Percent transmission-expansion cases.
+            # Folder example: Exp500_simple_300_2019
+            foreach TC ( -20 -10 0 25 50 100 200 300 )
+                set dirName = ${folNameBase}${NN}_${UC}_${TC}_${Year}
 
-				#foreach TC ( 25 50 75 100 200 300 400 500 )
-				foreach TC ( 300 )
+                if ( -d ${dirName} ) then
+                    cd ${dirName}
 
-					set dirName = ${folNameBase}${NN}${UC}${TC}_${Year}${SC}
-		   			cd $dirName
-					
-					if ($UC == _simple_) then
+                    foreach WIN ( 0 1 2 3 )
+                        bsub -n 2 -R "span[hosts=1]" -R "rusage[mem=20GB]" -W 5760 \
+                            -o out_win${WIN}.%J -e err_win${WIN}.%J \
+                            "conda run -p /usr/local/usrapps/infews/jqian4/env_jqian4 python wrapper_${UC}.py --win ${WIN}"
+                    end
 
-						# Submit LSF job for the directory $dirName
-		   				#bsub -n 8 -q shared_memory -R "span[hosts=1]" -R "rusage[mem=60GB]" -W 14400 -o out.%J -e err.%J "python wrapper_simple${SC}.py"
-		   				bsub -n 2 -R "span[hosts=1]" -R "rusage[mem=14GB]" -W 5760 -o out.%J -e err.%J "python wrapper_simple${SC}.py"
-		   				# Go back to upper level directory
-		    				cd ..
+                    cd ..
+                else
+                    echo "Warning: directory not found, skipping ${dirName}"
+                endif
+            end
 
-					else if ($UC == _coal_) then
+            # Additive-MW transmission-expansion cases.
+            # Folder example: Exp500_simple_MW_25_2019
+            foreach TC_MW ( 25 50 75 100 300 )
+                set dirName = ${folNameBase}${NN}_${UC}_MW_${TC_MW}_${Year}
 
-						# Submit LSF job for the directory $dirName
-		   				#bsub -n 32 -q shared_memory -R "span[hosts=1]" -R "rusage[mem=60GB]" -W 14400 -o out.%J -e err.%J "python wrapper_coal.py"
-		   				bsub -n 2 -R "span[hosts=1]" -R "rusage[mem=14GB]" -W 5760 -o out.%J -e err.%J "python wrapper_coal.py"
-						# Go back to upper level directory
-		    				cd ..
+                if ( -d ${dirName} ) then
+                    cd ${dirName}
 
-					endif
+                    foreach WIN ( 0 1 2 3 )
+                        bsub -n 2 -R "span[hosts=1]" -R "rusage[mem=20GB]" -W 5760 \
+                            -o out_win${WIN}.%J -e err_win${WIN}.%J \
+                            "conda run -p /usr/local/usrapps/infews/jqian4/env_jqian4 python wrapper_${UC}.py --win ${WIN}"
+                    end
 
-				end
-			end
-		end
-	end
+                    cd ..
+                else
+                    echo "Warning: directory not found, skipping ${dirName}"
+                endif
+            end
+
+        end
+    end
 end
 
-conda deactivate
+#conda deactivate

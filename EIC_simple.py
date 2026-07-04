@@ -21,35 +21,7 @@ model.Wind = Set()
 model.Thermal = model.Coal | model.Oil | model.Gas
 model.Generators = model.Thermal | model.Hydro | model.Solar | model.Wind
 model.Dispatchable = model.Hydro | model.Oil | model.Gas | model.Coal
-model.Outage = model.Coal | model.Gas
-
-#outage sets
-model.Gas_below_50 = Set()
-model.Gas_50_100 = Set()
-model.Gas_100_200 = Set()
-model.Gas_200_300 = Set()
-model.Gas_300_400 = Set()
-model.Gas_400_600 = Set()
-model.Gas_600_800 = Set()
-model.Gas_800_1000 = Set()
-model.Gas_ovr_1000 = Set()
-model.Gas_All_n_0_100 = Set()
-model.Gas_All_n_100_200 = Set()
-model.Gas_All_n_ovr_200 = Set()
-model.Coal_below_50 = Set()
-model.Coal_50_100 = Set()
-model.Coal_100_200 = Set()
-model.Coal_200_300 = Set()
-model.Coal_300_400 = Set()
-model.Coal_400_600 = Set()
-model.Coal_600_800 = Set()
-model.Coal_800_1000 = Set()
-model.Coal_ovr_1000 = Set()
-model.Coal_All_n_0_100 = Set()
-model.Coal_All_n_100_200 = Set()
-model.Coal_All_n_ovr_200 = Set()
-model.Nuclear_ovr_1000 = Set()
-model.Nuclear_800_1000 = Set()
+model.Outage = model.Coal | model.Gas | model.Oil
 
 # transmission sets
 model.lines = Set() 

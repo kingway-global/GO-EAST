@@ -68,8 +68,5 @@ for state in states:
 
 #saving coal prices as CSV file
 coal_price_final_daily = pd.DataFrame(data=daily_state_coal_price)
-coal_price_final_daily.to_csv('coal_prices_state.csv',index=False)
-
-
-
+coal_price_final_daily.to_csv('coal_prices_state_2019.csv',index=False)
 
