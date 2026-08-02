@@ -17,7 +17,7 @@ from matplotlib.colors import TwoSlopeNorm
 
 base_dir = 'Data'
 
-RTS = [650]
+RTS = [500]
 distance_threshold = 5
 
 df_BAs = pd.read_csv(os.path.join(base_dir, 'Interconnections/BAs_full.csv'), header=0, index_col=0)

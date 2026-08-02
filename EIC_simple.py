@@ -202,6 +202,8 @@ def SysCost(model):
 
 model.SystemCost = Objective(rule=SysCost, sense=minimize)
 
+# Create a parameter to store the objective value
+#model.ObjValue = Param(mutable=True, initialize=0)
 
 ######=================================================########
 ######               Segment B.9                      ########
